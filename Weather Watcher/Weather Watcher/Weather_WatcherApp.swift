@@ -12,6 +12,7 @@ struct Weather_WatcherApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(LocationManager())
         }
     }
 }

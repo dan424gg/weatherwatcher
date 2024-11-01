@@ -5,20 +5,16 @@
 //  Created by Daniel Wells on 10/15/24.
 //
 
+import MapKit
 import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
+        Home()
     }
 }
 
 #Preview {
     ContentView()
+        .environment(LocationManager())
 }

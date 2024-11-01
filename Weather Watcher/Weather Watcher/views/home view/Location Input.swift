@@ -35,8 +35,7 @@ struct Location_Input: View {
         }
     }
     
-    
-    var body: some View {
+    var textField: some View {
         TextField(text: $location, label: {
             if allowCurrentLocation && locManager.userLocation != nil {
                 Text("Current Location")
@@ -58,15 +57,20 @@ struct Location_Input: View {
         .onSubmit {
             search(for: location)
         }
-        .applyHorizontalMargin()
+    }
+    
+    
+    var body: some View {
+        textField
+            .applyHorizontalMargin()
     }
 }
 
 #Preview {
     Location_Input(location: .constant("Where to?"), coordinates: .constant(.greenlake), visibleRegion: .constant(MKCoordinateRegion(
-        center: .greenlake,
-        span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
-    )
-), textHint: "Beginning")
-        .environment(LocationManager())
+                center: .greenlake,
+                span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+            )
+        ), textHint: "Beginning")
+                .environment(LocationManager())
 }
