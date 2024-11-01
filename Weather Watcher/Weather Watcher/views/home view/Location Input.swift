@@ -50,6 +50,7 @@ struct Location_Input: View {
                 Text(location)
             }
         })
+        .font(.system(size: 22))
         .autocorrectionDisabled()
         .textInputAutocapitalization(.never)
         .multilineTextAlignment(.center)

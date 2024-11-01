@@ -56,22 +56,21 @@ struct search_result: View {
 
     
     var body: some View {
-        VStack {
-            Divider()
-            HStack {
-                Image(systemName: symbolForCategory(mapItem.pointOfInterestCategory))
-                    .font(.system(size: 25))
-                VStack(alignment: .leading) {
-                    Text(mapItem.name ?? "Loading...")
+        HStack {
+            Image(systemName: symbolForCategory(mapItem.pointOfInterestCategory))
+                .font(.system(size: 25))
+            VStack(alignment: .leading) {
+                Text(mapItem.name ?? "Loading...")
+                HStack {
                     Text(formatSecondsToHoursMinutes(Int(route.expectedTravelTime.magnitude)))
                         .foregroundStyle(.gray)
                         .font(.system(size: 14))
+                    Divider()         
                     Text(convertToUserMeasurement(route.distance.magnitude))
                         .foregroundStyle(.gray)
                         .font(.system(size: 14))
                 }
             }
-            Divider()
         }
         .applyHorizontalMargin()
     }

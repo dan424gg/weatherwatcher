@@ -60,6 +60,10 @@ extension View {
     func applyHorizontalMargin(modifier: Double = 1.0) -> some View {
         self.modifier(ApplyHorizontalMargin(modifier: modifier))
     }
+    
+    func applyKeyboardPadding(offset: CGFloat = 0) -> some View {
+        ModifiedContent(content: self, modifier: KeyboardAwareModifier(paddingOffset: offset))
+    }
 }
 
 
@@ -68,11 +72,11 @@ func formatSecondsToHoursMinutes(_ seconds: Int) -> String {
     let minutes = (seconds % 3600) / 60
     
     if hours > 1 {
-        return "\(hours)h \(minutes)m"
+        return "\(hours) hr \(minutes) min"
     } else if minutes > 0 {
-        return "\(minutes)m"
+        return "\(minutes) min"
     } else {
-        return "less than 1m"
+        return "less than 1 min"
     }
 }
 
@@ -88,6 +92,34 @@ struct ApplyHorizontalMargin: ViewModifier {
 }
 
 
+struct KeyboardAwareModifier: ViewModifier {
+    var paddingOffset: CGFloat
+    @State private var keyboardHeight: CGFloat = 0
+
+    private var keyboardHeightPublisher: AnyPublisher<CGFloat, Never> {
+        Publishers.Merge(
+            NotificationCenter.default
+                .publisher(for: UIResponder.keyboardWillShowNotification)
+                .compactMap { $0.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue }
+                .map { $0.cgRectValue.height + paddingOffset },
+            NotificationCenter.default
+                .publisher(for: UIResponder.keyboardWillHideNotification)
+                .map { _ in CGFloat(0) }
+       ).eraseToAnyPublisher()
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .padding(.bottom, keyboardHeight)
+            .onReceive(keyboardHeightPublisher) { height in
+                withAnimation {
+                    self.keyboardHeight = height
+                }
+            }
+    }
+}
+
+
 struct SizePreferenceKey: PreferenceKey {
     static var defaultValue: CGSize = .zero
     static func reduce(value: inout CGSize, nextValue: () -> CGSize) {}
@@ -96,12 +128,10 @@ struct SizePreferenceKey: PreferenceKey {
 
 struct UserInputBoder: TextFieldStyle {
     @State private var borderColor: Color = .gray
-    @FocusState private var isFocused: Bool
     
     func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
-            .focused($isFocused)
-            .padding(8)
+            .padding(13)
 //            .background (
 //                RoundedRectangle(cornerRadius: 50)
 //                    .stroke(!isFocused ? borderColor : .clear, lineWidth: 1)
