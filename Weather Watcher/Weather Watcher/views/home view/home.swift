@@ -18,7 +18,6 @@ struct Home: View {
     @Environment(LocationManager.self) var locManager
     @State private var visibleRegion: MKCoordinateRegion?
     @State var position: MapCameraPosition = .userLocation(followsHeading: true, fallback: .automatic)
-//    @State var searchResults: [MKMapItem] = []
     @State var route: MKRoute?
     @State var isSearching: Bool = false
     @Namespace private var mapScope
@@ -39,16 +38,6 @@ struct Home: View {
                     .stroke(.blue, lineWidth: 5)
                 Marker("Destination", coordinate: route.steps.last!.polyline.coordinate)
             }
-            
-            Marker(item: {
-                let coordinate = CLLocationCoordinate2D(latitude: 37.334722, longitude: -122.008889) // Apple Park
-                let placemark = MKPlacemark(coordinate: coordinate)
-                var item = MKMapItem(placemark: placemark)
-                item.name = "Apple Park"
-                
-                return item
-            }())
-
             
             UserAnnotation()
         }
@@ -73,6 +62,7 @@ struct Home: View {
         .overlay(alignment: .top) {
             SearchArea(position: $position, route: $route, visibleRegion: $visibleRegion, isInteracting: $isSearching)
         }
+        .ignoresSafeArea(.keyboard)
     }
 }
 

@@ -8,13 +8,19 @@
 import MapKit
 import SwiftUI
 
-struct search_result: View {
+struct search_result: View, Equatable {
+    static func == (lhs: search_result, rhs: search_result) -> Bool {
+        return lhs.mapItem == rhs.mapItem
+    }
+    
+    @Binding var coordinates: CLLocationCoordinate2D?
     let mapItem: MKMapItem
-    let route: MKRoute
+    var route: MKRoute? = nil
+    
     
     private func convertToUserMeasurement(_ distance: Double) -> String {
         // TODO convert to Kilometers too
-        var convertedValue = distance / 1609.344
+        let convertedValue = distance / 1609.344
         
         if convertedValue < 100 {
             return String(format: "%.1f miles", convertedValue)
@@ -61,15 +67,29 @@ struct search_result: View {
                 .font(.system(size: 25))
             VStack(alignment: .leading) {
                 Text(mapItem.name ?? "Loading...")
+                    .truncationMode(.tail)
                 HStack {
-                    Text(formatSecondsToHoursMinutes(Int(route.expectedTravelTime.magnitude)))
+                    Text("0hr 0min")
                         .foregroundStyle(.gray)
                         .font(.system(size: 14))
-                    Divider()         
-                    Text(convertToUserMeasurement(route.distance.magnitude))
+                    Divider()
+                    Text("0 miles")
                         .foregroundStyle(.gray)
                         .font(.system(size: 14))
+//                    Text(formatSecondsToHoursMinutes(Int(route.expectedTravelTime.magnitude)))
+//                        .foregroundStyle(.gray)
+//                        .font(.system(size: 14))
+//                    Divider()         
+//                    Text(convertToUserMeasurement(route.distance.magnitude))
+//                        .foregroundStyle(.gray)
+//                        .font(.system(size: 14))
                 }
+            }
+        }
+        .onTapGesture {
+            // when this singular result is tapped, we give the coordinate of this result to the corresponding coordinate state in Location Input
+            withAnimation {
+                coordinates = mapItem.placemark.coordinate
             }
         }
         .applyHorizontalMargin()
@@ -77,7 +97,7 @@ struct search_result: View {
 }
 
 #Preview {
-    search_result(mapItem: {
+    search_result(coordinates: .constant(.greenlake), mapItem: {
         let coordinate = CLLocationCoordinate2D(latitude: 37.334722, longitude: -122.008889) // Apple Park
         let placemark = MKPlacemark(coordinate: coordinate)
         var item = MKMapItem(placemark: placemark)

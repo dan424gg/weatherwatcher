@@ -11,6 +11,7 @@ import SwiftUI
 struct Location_Input: View {
     @Binding var location: String
     @Binding var coordinates: CLLocationCoordinate2D?
+    @Binding var searchResults: [search_result]?
     @Binding var visibleRegion: MKCoordinateRegion?
     let textHint: String
     var allowCurrentLocation: Bool = false
@@ -31,17 +32,21 @@ struct Location_Input: View {
         Task {
             let search = MKLocalSearch(request: request)
             let response = try? await search.start()
-            coordinates = response?.mapItems.first?.placemark.coordinate
+            searchResults = response?.mapItems.map { mapItem in
+                search_result(coordinates: $coordinates, mapItem: mapItem)
+            } ?? []
         }
     }
     
     var textField: some View {
         TextField(text: $location, label: {
-            if allowCurrentLocation && locManager.userLocation != nil {
+            if location.isEmpty && allowCurrentLocation && locManager.userLocation != nil {
                 Text("Current Location")
                     .foregroundStyle(.blue)
                     .onAppear {
-                        coordinates = locManager.userLocation
+                        if let userLocation = locManager.userLocation {
+                            coordinates = userLocation
+                        }
                     }
             } else if location.isEmpty {
                 Text(textHint)
@@ -55,7 +60,7 @@ struct Location_Input: View {
         .textInputAutocapitalization(.never)
         .multilineTextAlignment(.center)
         .textFieldStyle(UserInputBoder())
-        .onSubmit {
+        .onChange(of: location) {
             search(for: location)
         }
     }
@@ -68,7 +73,7 @@ struct Location_Input: View {
 }
 
 #Preview {
-    Location_Input(location: .constant("Where to?"), coordinates: .constant(.greenlake), visibleRegion: .constant(MKCoordinateRegion(
+    Location_Input(location: .constant("Where to?"), coordinates: .constant(.greenlake), searchResults: .constant([]), visibleRegion: .constant(MKCoordinateRegion(
                 center: .greenlake,
                 span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
             )

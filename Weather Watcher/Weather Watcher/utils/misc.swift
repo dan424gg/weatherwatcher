@@ -81,6 +81,11 @@ func formatSecondsToHoursMinutes(_ seconds: Int) -> String {
 }
 
 
+func hideKeyboard() {
+    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+}
+
+
 struct ApplyHorizontalMargin: ViewModifier {
     let modifier: Double
     let width: Double = (UIScreen.current?.bounds.width ?? 500) * 0.85
@@ -102,6 +107,7 @@ struct KeyboardAwareModifier: ViewModifier {
                 .publisher(for: UIResponder.keyboardWillShowNotification)
                 .compactMap { $0.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue }
                 .map { $0.cgRectValue.height + paddingOffset },
+            
             NotificationCenter.default
                 .publisher(for: UIResponder.keyboardWillHideNotification)
                 .map { _ in CGFloat(0) }
